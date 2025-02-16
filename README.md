@@ -15,3 +15,9 @@ cd src
 ./setup-tailwind-build.sh
 ./build-tailwindcss.sh -v -k -c
 ```
+
+## Release
+
+You can also download a binary release directly.
+
+- [tailwindcss-freebsd-x64 3.4.17](https://github.com/jfreeze/tailwind-freebsd-builder/releases/download/3.4.17/tailwindcss-freebsd-x64)
