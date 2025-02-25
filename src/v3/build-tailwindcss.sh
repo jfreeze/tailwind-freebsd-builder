@@ -24,8 +24,8 @@ set -e
 
 # Configuration
 readonly SCRIPT_VERSION="1.0.0"
-readonly TAILWIND_VSN="${TAILWIND_VSN:-4.0.6}"
-readonly PARALLEL_JOBS="${PARALLEL_JOBS:-8}"
+readonly TAILWIND_VSN="${TAILWIND_VSN:-3.4.17}"
+readonly PARALLEL_JOBS="${PARALLEL_JOBS:-$(sysctl -n hw.ncpu)}"
 readonly GCC_VERSION="12"
 readonly REQUIRED_PKGS="devel/binutils devel/gmake lang/gcc${GCC_VERSION} lang/python sysutils/patchelf devel/git@tiny www/npm-node18 patchelf perl5 python310"
 
@@ -62,7 +62,7 @@ cleanup() {
     if [ "${DRY_RUN}" -eq 1 ]; then
         return
     fi
-    
+
     if [ -n "${TMPDIR}" ] && [ -d "${TMPDIR}" ]; then
         log_debug "Cleaning up ${TMPDIR}"
         rm -rf "${TMPDIR}"
@@ -72,14 +72,14 @@ cleanup() {
 # Check for required commands
 check_dependencies() {
     local missing_deps=0
-    
+
     for cmd in gcc${GCC_VERSION} gmake git npm python3.10 patchelf perl; do
         if ! command -v "${cmd}" >/dev/null 2>&1; then
             log_error "${cmd} is required but not installed"
             missing_deps=1
         fi
     done
-    
+
     if [ "${missing_deps}" -eq 1 ]; then
         exit 1
     fi
@@ -88,11 +88,14 @@ check_dependencies() {
 # Parse command line options
 while getopts "vdcj:" opt; do
     case "${opt}" in
-        v) VERBOSE=1 ;;
-        d) DRY_RUN=1 ;;
-        c) CLEAN_BUILD=1 ;;
-        j) PARALLEL_JOBS="${OPTARG}" ;;
-        *) echo "Usage: $0 [-v] [-d] [-c] [-j jobs]" >&2; exit 1 ;;
+    v) VERBOSE=1 ;;
+    d) DRY_RUN=1 ;;
+    c) CLEAN_BUILD=1 ;;
+    j) PARALLEL_JOBS="${OPTARG}" ;;
+    *)
+        echo "Usage: $0 [-v] [-d] [-c] [-j jobs]" >&2
+        exit 1
+        ;;
     esac
 done
 
@@ -103,22 +106,22 @@ setup_environment() {
     : "${CXX:=/usr/local/bin/g++${GCC_VERSION}}"
     : "${LD:=/usr/local/bin/ld}"
     : "${MAKE:=/usr/local/bin/gmake}"
-    
+
     # Build configuration
     : "${MAKEFLAGS:=-j${PARALLEL_JOBS}}"
     : "${LDFLAGS:=-Wl,-rpath=/usr/local/lib/gcc${GCC_VERSION}}"
-    
+
     # Build directories
     : "${TMPDIR:=$(mktemp -d -t tailwind)}"
     : "${TAILWIND:=${TMPDIR}/src}"
-    
+
     # NPM configuration
     : "${NPM_CONFIG_CACHE:=${TMPDIR}/.npm}"
     : "${PKG_CACHE_PATH:=${TMPDIR}/.pkg-cache}"
-    
+
     export CC CXX LD MAKE MAKEFLAGS LDFLAGS TMPDIR TAILWIND NPM_CONFIG_CACHE PKG_CACHE_PATH
     export PATH="${TMPDIR}:${PATH}"
-    
+
     log_debug "Build directory: ${TMPDIR}"
     log_debug "Compiler: ${CC}"
     log_debug "Make flags: ${MAKEFLAGS}"
@@ -148,21 +151,21 @@ build_tailwind() {
     if [ "${DRY_RUN}" -eq 1 ]; then
         return
     fi
-    
+
     log_info "Building Tailwind CSS..."
-    
+
     # Install dependencies
     cd "${TAILWIND}"
     log_debug "Installing main dependencies..."
     npm install --omit=dev
     check_exit "NPM install"
-    
+
     # Build standalone CLI
     cd "./standalone-cli"
     log_debug "Installing CLI dependencies..."
     npm ci
     check_exit "NPM CI"
-    
+
     log_debug "Installing Tailwind plugins..."
     npm install -D "tailwindcss@v${TAILWIND_VSN}" \
         @tailwindcss/typography@latest \
@@ -172,7 +175,7 @@ build_tailwind() {
         postcss@latest \
         autoprefixer@latest
     check_exit "Plugin installation"
-    
+
     log_debug "Building standalone binary..."
     ./node_modules/.bin/pkg . \
         --target "node18-freebsd-x64" \
@@ -182,16 +185,16 @@ build_tailwind() {
         --python /usr/local/bin/python3.10 \
         --public
     check_exit "Binary build"
-    
+
     log_debug "Patching binary..."
     patchelf --add-rpath "/usr/local/lib/gcc${GCC_VERSION}" dist/tailwindcss-standalone
     check_exit "Binary patching"
-    
+
     log_debug "Adjusting payload position..."
     perl -pe 's/(var PAYLOAD_POSITION = .)(\d+)/$1 . ($2 + 4096)/e; s/(var PRELUDE_POSITION = .)(\d+)/$1 . ($2 + 4096)/e;' \
-        < dist/tailwindcss-standalone > "${HOME}/tailwindcss-freebsd-x64"
+        <dist/tailwindcss-standalone >"${HOME}/tailwindcss-freebsd-x64"
     check_exit "Payload adjustment"
-    
+
     chmod +x "${HOME}/tailwindcss-freebsd-x64"
 }
 
@@ -200,15 +203,15 @@ verify_build() {
     if [ "${DRY_RUN}" -eq 1 ]; then
         return
     fi
-    
+
     log_info "Verifying build..."
     cd "${HOME}"
-    
+
     if [ ! -x "./tailwindcss-freebsd-x64" ]; then
         log_error "Build verification failed: Binary not found or not executable"
         exit 1
     fi
-    
+
     log_info "Generating checksums..."
     sha256 tailwindcss-freebsd-x64
     sha512 tailwindcss-freebsd-x64
@@ -217,16 +220,16 @@ verify_build() {
 # Main
 main() {
     log_info "Starting Tailwind CSS build process v${SCRIPT_VERSION}"
-    
+
     trap cleanup EXIT
-    
+
     check_dependencies
     setup_environment
     install_dependencies
     clone_source
     build_tailwind
     verify_build
-    
+
     log_info "Build completed successfully"
 }
 
