@@ -29,7 +29,7 @@ Currently `bun` is not supported on the BSDs.
 
 The work around is to use the Node version of `tailwindcss` for v4. Using this hybrid approach with `esbuild` is simple to setup and use. Using the hybrid approach comes with the added bonus that TailwindCSS v4 can be used on Arm64 architectures.
 
-For details on how to use TailwindCSS v4 with Phoenix, set the [Horizon project](https://hex.pm/packages/horizon).
+For details on how to use TailwindCSS v4 with Phoenix, see the online documentation for the [Horizon project](https://hex.pm/packages/horizon).
 
 ## Release
 
