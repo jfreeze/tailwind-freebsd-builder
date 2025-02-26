@@ -2,7 +2,7 @@ Build TailwindCSS CLI v3 for FreeBSD.
 
 ## Usage
 
-This project contains the build scripts to create a standalone `tailwindcss` executable. If is only compatible with `Amd64` FreeBSD systems.
+This project contains the build scripts to create a standalone `tailwindcss` executable. It is only compatible with `Amd64` FreeBSD systems.
 
 Run the following script from a FreeBSD host to build the TailwindCSS CLI binaries.
 
