@@ -1,39 +1,54 @@
-Build TailwindCSS CLI v3 for FreeBSD.
+# TailwindCSS FreeBSD Builder
 
-## Usage
+Build TailwindCSS CLI v3 for FreeBSD. Only compatible with `Amd64` architecture.
 
-This project contains the build scripts to create a standalone `tailwindcss` executable. It is only compatible with `Amd64` FreeBSD systems.
+## Usage with Phoenix
 
-Run the following script from a FreeBSD host to build the TailwindCSS CLI binaries.
+The pre-compiled binaries can be used with Phoenix Framework's built-in tasks:
+
+```diff
++  @tailwindcss_freebsd_x64 "https://github.com/jfreeze/tailwind-freebsd-builder/releases/$version/tailwindcss-$target"
+  ...
+  defp aliases do
+    [
+      ...
+      "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
++      "assets.setup.freebsd": [
++        "tailwind.install #{@tailwindcss_freebsd_x64}",
++        "esbuild.install --if-missing"
++      ],
+      ...
+    ]
+  end
+```
+
+## Building from Source
+
+Or run the following commands from a FreeBSD host to build the TailwindCSS CLI binaries:
 
 ```shell
 git clone https://github.com/jfreeze/tailwind-freebsd-builder.git
 cd tailwind-freebsd-builder
 cd src/v3
 
-# if not building 3.4.17 set the version, e.g. 3.4.13
+# If not building 3.4.17, set the version
 export TAILWIND_VSN=3.4.13
 
 ./setup-tailwind-build.sh
 ./build-tailwindcss.sh -v -k -c
 ```
 
-Note: This script will take hours to compile and needs additional swap to run. It has been successfully run with 10GB of additional swap.
+**Note:** This compilation process takes several hours and requires about 10GB of additional swap space.
 
-## Comments on TailwindCSS v4
+## TailwindCSS v4 Notes
 
-TailwindCSS v4 is a major release that has a number of changes that are not compatible with the current build scripts. 
+TailwindCSS v4 is not compatible with the current build scripts. The recommended approach is to use the Node.js version of `tailwindcss` for v4 with `esbuild` until `bun` is available for FreeBSD.
 
-After going down several rabbit holes, I think the best option is to wait for `bun` to be compiled on FreeBSD.
-Currently `bun` is not supported on the BSDs.
+For details on using TailwindCSS v4 with Phoenix, see the [Horizon project documentation](https://hex.pm/packages/horizon).
 
-The work around is to use the Node version of `tailwindcss` for v4. Using this hybrid approach with `esbuild` is simple to setup and use. Using the hybrid approach comes with the added bonus that TailwindCSS v4 can be used on Arm64 architectures.
+## Pre-built Binaries
 
-For details on how to use TailwindCSS v4 with Phoenix, see the online documentation for the [Horizon project](https://hex.pm/packages/horizon).
-
-## Release
-
-Download a binary releases directly.
+Download or reference ready-to-use binaries:
 
 - [tailwindcss-freebsd-x64 3.4.13](https://github.com/jfreeze/tailwind-freebsd-builder/releases/download/3.4.13/tailwindcss-freebsd-x64)
 - [tailwindcss-freebsd-x64 3.4.17](https://github.com/jfreeze/tailwind-freebsd-builder/releases/download/3.4.17/tailwindcss-freebsd-x64)
