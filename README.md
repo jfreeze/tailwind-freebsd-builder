@@ -1,6 +1,6 @@
 # TailwindCSS FreeBSD Builder
 
-Build TailwindCSS CLI v3 for FreeBSD. Only compatible with `Amd64` architecture.
+Build TailwindCSS CLI v3 for FreeBSD. Only compatible with `Amd64` architecture. The build process was originally created by [DCH](https://people.freebsd.org/~dch/).
 
 ## Usage with Phoenix
 
@@ -53,3 +53,5 @@ Download or reference ready-to-use binaries:
 
 - [tailwindcss-freebsd-x64 3.4.13](https://github.com/jfreeze/tailwind-freebsd-builder/releases/download/3.4.13/tailwindcss-freebsd-x64)
 - [tailwindcss-freebsd-x64 3.4.17](https://github.com/jfreeze/tailwind-freebsd-builder/releases/download/3.4.17/tailwindcss-freebsd-x64)
+
+Additional tailwind FreeBSD binaries are also available from [DCH's site](https://people.freebsd.org/~dch/pub/tailwind/).
