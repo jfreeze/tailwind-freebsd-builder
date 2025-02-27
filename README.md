@@ -7,7 +7,8 @@ Build TailwindCSS CLI v3 for FreeBSD. Only compatible with `Amd64` architecture.
 The pre-compiled binaries can be used with Phoenix Framework's built-in tasks:
 
 ```diff
-+  @tailwindcss_freebsd_x64 "https://github.com/jfreeze/tailwind-freebsd-builder/releases/$version/tailwindcss-$target"
++  @tailwindcss_freebsd_x64 "https://github.com/jfreeze/tailwind-freebsd-builder/releases/download/$version/tailwindcss-$target"
+
   ...
   defp aliases do
     [
